@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Gym Booking</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body class="container mt-5">
+  <h1>Book a Class</h1>
+  <form action="/book" method="POST" class="mb-4">
+    <input name="name" class="form-control mb-2" placeholder="Your Name" required>
+    <input name="memberID" class="form-control mb-2" placeholder="(Optional) Existing Member ID">
+    <select name="classID" class="form-control mb-2" required>
+      <% classes.forEach(c => { %>
+        <option value="<%= c.classID %>"><%= c.className %></option>
+      <% }) %>
+    </select>
+    <input type="date" name="booking_date" class="form-control mb-2" required>
+    <select name="timeslot" class="form-control mb-2" required>
+      <% for (let hour = 11; hour <= 20; hour++) { %>
+        <option><%= hour %>:00</option>
+      <% } %>
+    </select>
+    <button class="btn btn-primary">Book</button>
+  </form>
+
+  <h2>Your Bookings</h2>
+  <table class="table table-bordered">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Member ID</th>
+        <th>Class</th>
+        <th>Date</th>
+        <th>Time</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% bookings.forEach(b => { %>
+        <tr>
+          <td><%= b.name %></td>
+          <td><%= b.memberID %></td>
+          <td><%= b.className %></td>
+          <td><%= b.booking_date.toISOString().split('T')[0] %></td>
+          <td><%= b.timeslot %></td>
+          <td><%= b.status %></td>
+          <td>
+            <form action="/cancel/<%= b.bookingID %>" method="POST" style="display:inline;">
+              <button class="btn btn-danger btn-sm">Cancel</button>
+            </form>
+            <a href="/edit/<%= b.bookingID %>" class="btn btn-secondary btn-sm">Edit</a>
+          </td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</body>
+</html>

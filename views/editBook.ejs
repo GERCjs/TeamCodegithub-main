@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Edit Booking</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body class="container mt-5">
+  <h1>Edit Booking</h1>
+  <form action="/edit/<%= booking.bookingID %>" method="POST">
+    <div class="mb-3">
+      <label for="classID" class="form-label">Class</label>
+      <select name="classID" class="form-control" required>
+        <% classes.forEach(c => { %>
+          <option value="<%= c.classID %>" <%= c.classID === booking.classID ? 'selected' : '' %>><%= c.className %> (<%= c.startTime %> - <%= c.endTime %>)</option>
+        <% }) %>
+      </select>
+    </div>
+    <div class="mb-3">
+      <label for="booking_date" class="form-label">Date</label>
+      <input type="date" name="booking_date" class="form-control" value="<%= booking.booking_date.toISOString().split('T')[0] %>" required>
+    </div>
+    <div class="mb-3">
+      <label for="timeslot" class="form-label">Time</label>
+      <select name="timeslot" class="form-control" required>
+        <% for (let hour = 11; hour <= 20; hour++) { %>
+          <option value="<%= hour %>:00" <%= booking.timeslot === hour + ':00' ? 'selected' : '' %>><%= hour %>:00</option>
+        <% } %>
+      </select>
+    </div>
+    <button class="btn btn-success">Save Changes</button>
+    <a href="/" class="btn btn-secondary">Cancel</a>
+  </form>
+</body>
+</html>

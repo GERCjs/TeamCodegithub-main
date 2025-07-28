@@ -563,7 +563,87 @@ app.delete('/billing/delete/:id', (req, res) => {
 
 
 /***********************/
+//booking 
+app.get('/book', (req, res) => {
+  const sql = "SELECT b.bookingID, m.name, m.memberID, c.className, b.booking_date, b.timeslot, b.status " +
+              "FROM bookings b " +
+              "JOIN members m ON b.memberID = m.memberID " +
+              "JOIN classes c ON b.classID = c.classID";
+  db.query(sql, (err, results) => {
+    if (err) throw err;
+    db.query('SELECT * FROM classes', (err, classes) => {
+      if (err) throw err;
+      res.render('book', { bookings: results, classes });
+    });
+  });
+});
 
+app.post('/book', (req, res) => {
+  const { name, memberID, classID, booking_date, timeslot } = req.body;
+  if (memberID) {
+    db.query(
+      'INSERT INTO bookings (memberID, classID, booking_date, timeslot) VALUES (?, ?, ?, ?)',
+      [memberID, classID, booking_date, timeslot],
+      err => {
+        if (err) throw err;
+        res.redirect('/book');
+      }
+    );
+  } else {
+    db.query('INSERT INTO members (name) VALUES (?)', [name], (err, result) => {
+      if (err) throw err;
+      const newMemberID = result.insertId;
+      db.query(
+        'INSERT INTO bookings (memberID, classID, booking_date, timeslot) VALUES (?, ?, ?, ?)',
+        [newMemberID, classID, booking_date, timeslot],
+        err => {
+          if (err) throw err;
+          res.redirect('/book');
+        }
+      );
+    });
+  }
+});
+
+app.post('/cancel/:id', (req, res) => {
+  db.query('UPDATE bookings SET status = "Cancelled" WHERE bookingID = ?', [req.params.id], err => {
+    if (err) throw err;
+    res.redirect('/book');
+  });
+});
+
+app.get('/edit/:id', (req, res) => {
+  const id = req.params.id;
+  db.query('SELECT * FROM classes', (err, classes) => {
+    if (err) throw err;
+    db.query(
+      "SELECT b.bookingID, m.name, c.classID, b.booking_date, b.timeslot " +
+      "FROM bookings b " +
+      "JOIN members m ON b.memberID = m.memberID " +
+      "JOIN classes c ON b.classID = c.classID " +
+      "WHERE b.bookingID = ?",
+      [id],
+      (err, result) => {
+        if (err) throw err;
+        res.render('edit', { booking: result[0], classes });
+      }
+    );
+  });
+});
+
+app.post('/edit/:id', (req, res) => {
+  const { classID, booking_date, timeslot } = req.body;
+  db.query(
+    'UPDATE bookings SET classID = ?, booking_date = ?, timeslot = ? WHERE bookingID = ?',
+    [classID, booking_date, timeslot, req.params.id],
+    err => {
+      if (err) throw err;
+      res.redirect('/');
+    }
+  );
+});
+
+//******************* */
 
 const PORT = process.env.PORT || 3307;
 app.listen(PORT, () => console.log(`Server running on port http://localhost:${PORT}/`));
